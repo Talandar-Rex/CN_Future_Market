@@ -1,0 +1,41 @@
+// 麦语言 代码 : 指标
+// 适用平台 : WH6, WH8
+
+
+// 参数 N1 的取值范围 : 0 至 100 , 默认值为 21
+// 参数 N2 的取值范围 : 0 至 100 , 默认值为 7
+// N1 := 21 ;
+// N2 := 7 ;
+
+// 求 近一段时期 ( 包括 当前 K线 ) 最高的 开盘价
+X1 := HHV( OPEN , N1 ) ;
+
+// 求 近一段时期 ( 包括 当前 K线 ) 最低的 开盘价
+X2 := LLV( OPEN , N2 ) ;
+
+// 计算 近期开盘价 的 中轨
+X3 : ( X1 + X2 ) / 2 , COLORMAGENTA ;
+
+// 计算 近期开盘价中轨 与 当前 K线 收盘价 的 差值
+// 差值 为正 表示 收盘价 低于 中轨
+// 差值 为负 表示 收盘价 高于 中轨
+TMP := X3 - CLOSE ;
+
+// 差值 为正 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 blue
+DRAWLINE( TMP >  0.00001 , HIGH , TMP >  0.00001 ,  OPEN ,   COLORBLUE ) ;
+DRAWLINE( TMP >  0.00001 ,  LOW , TMP >  0.00001 , CLOSE ,   COLORBLUE ) ;
+
+// 差值 为负 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 yellow
+DRAWLINE( TMP < -0.00001 , HIGH , TMP < -0.00001 , CLOSE , COLORYELLOW ) ;
+DRAWLINE( TMP < -0.00001 ,  LOW , TMP < -0.00001 ,  OPEN , COLORYELLOW ) ;
+
+// 差值 为负 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 white
+DRAWLINE( ABS( TMP ) < 0.00001 ,  LOW , ABS( TMP ) < 0.00001 , OPEN , COLORWHITE ) ;
+DRAWLINE( ABS( TMP ) < 0.00001 , HIGH , ABS( TMP ) < 0.00001 , OPEN , COLORWHITE ) ;
+
+// 差值 为正 , 将 K线 的 开收范围 ( 长方形边框 ) 涂成 blue
+STICKLINE( TMP >  0.00001 , OPEN , CLOSE ,   COLORBLUE , 1 ) ;
+
+// 差值 为负 , 将 K线 的 开收范围 ( 长方形边框 ) 涂成 yellow
+STICKLINE( TMP < -0.00001 , OPEN , CLOSE , COLORYELLOW , 1 ) ;
+
