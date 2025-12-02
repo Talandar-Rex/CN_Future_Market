@@ -29,7 +29,7 @@ DRAWLINE( TMP >  0.00001 ,  LOW , TMP >  0.00001 , CLOSE ,   COLORBLUE ) ;
 DRAWLINE( TMP < -0.00001 , HIGH , TMP < -0.00001 , CLOSE , COLORYELLOW ) ;
 DRAWLINE( TMP < -0.00001 ,  LOW , TMP < -0.00001 ,  OPEN , COLORYELLOW ) ;
 
-// 差值 为负 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 white
+// 差值 为零 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 white
 DRAWLINE( ABS( TMP ) < 0.00001 ,  LOW , ABS( TMP ) < 0.00001 , OPEN , COLORWHITE ) ;
 DRAWLINE( ABS( TMP ) < 0.00001 , HIGH , ABS( TMP ) < 0.00001 , OPEN , COLORWHITE ) ;
 
