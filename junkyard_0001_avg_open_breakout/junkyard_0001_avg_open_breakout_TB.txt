@@ -1,1 +1,117 @@
+//------------------------------------------------------------------------
+// 简称: junkyard_0001_avg_open_breakout
+// 名称: 
+// 类别: 策略应用
+// 类型: 用户应用
+// 输出: Void
+//------------------------------------------------------------------------
+
+
+Params
+    Numeric N1( 21 ) ; // 参数 N1 的取值范围 : 0 至 100 , 默认值为 21
+    Numeric N2(  7 ) ; // 参数 N2 的取值范围 : 0 至 100 , 默认值为  7
+
+
+Vars
+    Series<Numeric> X1 ; // 近 N1 期 ( 包括 当前 K线 ) 最高的 开盘价
+    Series<Numeric> X2 ; // 近 N2 期 ( 包括 当前 K线 ) 最低的 开盘价
+    Series<Numeric> X3 ;
+    Series<Numeric> TMP ;
+    Plot plt_stick_pos ;
+    Plot plt_stick_neg ;
+    Plot plt_stick_zero ;
+    Plot plt_rectangle_pos ;
+    Plot plt_rectangle_neg ;
+
+
+Events
+    OnInit()
+    {
+        plt_stick_pos.setOption( "stick_pos" , "color" , Blue() ) ;
+        plt_stick_pos.setOption( "stick_pos" , "bar-width" , 0.1 ) ;
+        
+        plt_stick_neg.setOption( "stick_neg" , "color" , Yellow() ) ;
+        plt_stick_neg.setOption( "stick_neg" , "bar-width" , 0.1 ) ;
+        
+        plt_stick_zero.setOption( "stick_zero" , "color" , White() ) ;
+        plt_stick_zero.setOption( "stick_zero" , "bar-width" , 0.1 ) ;
+        
+        plt_rectangle_pos.setOption( "rectangle_pos" , "color" , Blue() ) ;
+        plt_rectangle_pos.setOption( "rectangle_pos" , "bar-width" , 7 ) ;
+        
+        plt_rectangle_neg.setOption( "rectangle_neg" , "color" , Yellow() ) ;
+        plt_rectangle_neg.setOption( "rectangle_neg" , "bar-width" , 7 ) ;
+    }
+    
+    OnBar(ArrayRef<Integer> indexs)
+    {
+        // ---------- 指标计算 : 开始 ----------
+        
+        // 计算 近 N1 期 ( 包括 当前 K线 ) 最高的 开盘价
+        X1 = HighestFC( Open , N1 ) ;
+        
+        // 计算 近 N2 期 ( 包括 当前 K线 ) 最低的 开盘价
+        X2 = LowestFC( Open , N2 ) ;
+        
+        Commentary( "Open = " + Text( Open ) ) ;
+        Commentary( "Highest Open X1 = " + Text( X1 ) ) ;
+        Commentary( "Lowest Open X2 = " + Text( X2 ) ) ;
+        
+        // 计算 近期开盘价 的 中轨
+        X3 = ( X1 + X2 ) / 2 ;
+        
+        // 计算 近期开盘价中轨 与 当前 K线 收盘价 的 差值
+        // 差值 为正 表示 收盘价 低于 中轨
+        // 差值 为负 表示 收盘价 高于 中轨
+        TMP = X3 - Close ;
+        
+        // ---------- 指标计算 : 结束 ----------
+        
+        // ---------- 图表绘制 : 开始 ----------
+        
+        // PlotNumeric : 在当前 Bar 输出一个数值
+        // void PlotNumeric( String Name , Numeric Number , Numeric Locator=0 , Integer Color=-1 , Integer BarsBack=0 )
+        // 其中 , 参数 Locator 可以填任何数值 , 对绘图无影响 ( 但是 不能漏填 )
+        PlotNumeric( "X3" , X3 , Close , Magenta() ) ;
+        
+        // 差值 为正 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 blue
+        // DRAWLINE( TMP >  0.00001 , OPEN , TMP >  0.00001 ,  HIGH ,   COLORBLUE ) ;
+        // DRAWLINE( TMP >  0.00001 ,  LOW , TMP >  0.00001 , CLOSE ,   COLORBLUE ) ;
+        If( TMP > 0.00001 )
+        {
+            plt_stick_pos.barv( "stick_pos" , Date + Time , Low , High ) ;
+        }
+
+        // 差值 为负 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 yellow
+        // DRAWLINE( TMP < -0.00001 , HIGH , TMP < -0.00001 , CLOSE , COLORYELLOW ) ;
+        // DRAWLINE( TMP < -0.00001 ,  LOW , TMP < -0.00001 ,  OPEN , COLORYELLOW ) ;
+        If( TMP < -0.00001 )
+        {
+            plt_stick_neg.barv( "stick_neg" , Date + Time , Low , High ) ;
+        }
+
+        // 差值 为零 , 将 K线 的 高低范围 ( 中轴线段 ) 涂成 white
+        // DRAWLINE( ABS( TMP ) < 0.00001 ,  LOW , ABS( TMP ) < 0.00001 , OPEN , COLORWHITE ) ;
+        // DRAWLINE( ABS( TMP ) < 0.00001 , HIGH , ABS( TMP ) < 0.00001 , OPEN , COLORWHITE ) ;
+        If( Abs( TMP ) < 0.00001 )
+        {
+            plt_stick_zero.barv( "stick_zero" , Date + Time , Low , High ) ;
+        }
+
+        // 差值 为正 , 将 K线 的 开收范围 ( 长方形边框 ) 涂成 blue
+        // STICKLINE( TMP >  0.00001 , OPEN , CLOSE ,   COLORBLUE , 1 ) ;
+        If( TMP > 0.00001 )
+        {
+            plt_rectangle_pos.barv( "rectangle_pos" , Date + Time , Open , Close ) ;
+        }
+
+        // 差值 为负 , 将 K线 的 开收范围 ( 长方形边框 ) 涂成 yellow
+        // STICKLINE( TMP < -0.00001 , OPEN , CLOSE , COLORYELLOW , 1 ) ;
+        If( TMP < -0.00001 )
+        {
+            plt_rectangle_neg.barv( "rectangle_neg" , Date + Time , Open , Close ) ;
+        }
+        
+        // ---------- 图表绘制 : 结束 ----------
+    }
 
